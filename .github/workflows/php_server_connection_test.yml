@@ -35,6 +35,7 @@ jobs:
             working-directory: test/server-connection
             env:
               PHP_BASEIMAGE_TAG: ${{ matrix.base_image.php_ver }}-fpm-${{ matrix.base_image.os_ver }}
+              PHP_VERSION: ${{ matrix.base_image.php_ver }}
               GRPC_VERSION: ${{ matrix.grpc_ver }}
               OS_VERSION: ${{ matrix.base_image.os_ver }}
             run: docker compose run php-client
