@@ -1,0 +1,40 @@
+name: "PHP: Test gRPC Connection"
+
+on:
+    workflow_dispatch: {}
+
+jobs:
+    test:
+        runs-on: [ ubuntu-24.04 ]
+        strategy:
+            fail-fast: false
+            matrix:
+                base_image:
+                    # https://hub.docker.com/_/php
+                    - { php_ver: "7.4", os_ver: "bullseye",  glibc_ver: "2.31" }
+                    - { php_ver: "8.0", os_ver: "bullseye",  glibc_ver: "2.31" }
+                    - { php_ver: "8.1", os_ver: "bullseye",  glibc_ver: "2.31" }
+                    - { php_ver: "8.2", os_ver: "bullseye",  glibc_ver: "2.31" }
+                    - { php_ver: "8.3", os_ver: "bullseye",  glibc_ver: "2.31" }
+                    - { php_ver: "8.1", os_ver: "bookworm",  glibc_ver: "2.36" }
+                    - { php_ver: "8.2", os_ver: "bookworm",  glibc_ver: "2.36" }
+                    - { php_ver: "8.3", os_ver: "bookworm",  glibc_ver: "2.36" }
+                grpc_ver:
+                    # Refarence: https://pecl.php.net/package/grpc
+                    - 1.66.0
+
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+
+          - name: Up gRPC Server
+            working-directory: test/server-connection
+            run: docker compose up -d
+
+          - name: Request by Client
+            working-directory: test/server-connection
+            env:
+              PHP_BASEIMAGE_TAG: ${{ matrix.base_image.php_ver }}-fpm-${{ matrix.base_image.os_ver }}
+              GRPC_VERSION: ${{ matrix.grpc_ver }}
+              OS_VERSION: ${{ matrix.base_image.os_ver }}
+            run: docker compose run php-client

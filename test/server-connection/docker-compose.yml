@@ -1,0 +1,16 @@
+services:
+  grpc-server:
+    build:
+      context: grpc-server
+    ports:
+      - 50051:50051
+
+  php-client:
+    profiles:
+      - client
+    build:
+      context: .
+      dockerfile: php/grpc${GRPC_VERSION:-1.66.0}-${OS_VERSION:-bookworm}.Dockerfile
+      args:
+        - PHP_BASEIMAGE_TAG=${PHP_BASEIMAGE_TAG:-8.3-fpm-bookworm}
+    command: php -d extension=grpc.so -d max_execution_time=300 ./grpc/examples/php/greeter_client.php world grpc-server:50051

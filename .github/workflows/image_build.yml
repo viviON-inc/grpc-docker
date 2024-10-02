@@ -1,0 +1,84 @@
+name: "PHP: Docker Image Build"
+
+on:
+    workflow_dispatch: {}
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency: ${{ github.workflow }}
+
+env:
+  REPOSITORY_NAME: ghcr.io/vivion-inc/grpc-docker
+  GRPC_OUTPUT_PATH: /usr/local/lib/php/extensions/grpc.so
+
+jobs:
+    php-debian:
+        runs-on: [ ubuntu-24.04 ]
+        strategy:
+            fail-fast: false
+            matrix:
+                base_image:
+                    # https://hub.docker.com/_/php
+                    - { php_ver: "7.4", os_ver: "bullseye",  glibc_ver: "2.31" }
+                    - { php_ver: "8.0", os_ver: "bullseye",  glibc_ver: "2.31" }
+                    - { php_ver: "8.1", os_ver: "bullseye",  glibc_ver: "2.31" }
+                    - { php_ver: "8.2", os_ver: "bullseye",  glibc_ver: "2.31" }
+                    - { php_ver: "8.3", os_ver: "bullseye",  glibc_ver: "2.31" }
+                    - { php_ver: "8.1", os_ver: "bookworm",  glibc_ver: "2.36" }
+                    - { php_ver: "8.2", os_ver: "bookworm",  glibc_ver: "2.36" }
+                    - { php_ver: "8.3", os_ver: "bookworm",  glibc_ver: "2.36" }
+                grpc_ver:
+                    # Refarence: https://pecl.php.net/package/grpc
+                    - 1.66.0
+                    - 1.65.5
+                    - 1.64.1
+        steps:
+          - name: Checkout
+            uses: actions/checkout@v4
+
+          - name: Set up QEMU
+            uses: docker/setup-qemu-action@v3
+
+          - name: Set up Docker Buildx
+            uses: docker/setup-buildx-action@v3
+
+          - name: Set Environment Varriable
+            shell: bash
+            run: |
+              echo "IMAGE_TAG_OSVER=${{ env.REPOSITORY_NAME }}:php${{ matrix.base_image.php_ver }}-pecl-grpc${{ matrix.grpc_ver }}-${{ matrix.base_image.os_ver }}" >> $GITHUB_ENV
+              echo "IMAGE_TAG_LIBCVER=${{ env.REPOSITORY_NAME }}:php${{ matrix.base_image.php_ver }}-pecl-grpc${{ matrix.grpc_ver }}-glibc${{ matrix.base_image.glibc_ver }}" >> $GITHUB_ENV
+
+          - name: Login to Docker Hub
+            uses: docker/login-action@v3
+            with:
+              registry: ghcr.io
+              username: ${{ github.actor }}
+              password: ${{ secrets.GITHUB_TOKEN }}
+
+          - name: Image Build
+            uses: docker/build-push-action@v6
+            with:
+              context: .
+              file: ./src/php/glibc/debian.Dockerfile
+              build-args: |
+                BUILDKIT_INLINE_CACHE=1
+                PHP_BASEIMAGE_TAG=${{ matrix.base_image.php_ver }}-fpm-${{ matrix.base_image.os_ver }}
+                GRPC_VERSION=${{ matrix.grpc_ver }}
+                GRPC_OUTPUT_PATH=${{ env.GRPC_OUTPUT_PATH }}
+              cache-from: ${{ env.IMAGE_TAG_OSVER }}
+              outputs: type=registry,push=true,oci-mediatypes=true,compression=zstd,compression-level=8
+              provenance: false
+              tags: |
+                ${{ env.IMAGE_TAG_OSVER }}
+                ${{ env.IMAGE_TAG_LIBCVER }}
+              platforms: |
+                linux/amd64
+                linux/arm64
+              labels: |
+                vivion-inc.php.version="${{ matrix.base_image.php_ver }}"
+                vivion-inc.glib.version="${{ matrix.base_image.glibc_ver }}"
+                vivion-inc.grpc.version="${{ matrix.grpc_ver }}"
+                org.opencontainers.image.source="${{ github.repositoryUrl }}"
+                org.opencontainers.image.description="gRPC builded docker images"
