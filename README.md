@@ -1,8 +1,9 @@
 # grpc-docker
+![example branch parameter](https://github.com/viviON-inc/grpc-docker/actions/workflows/php_server_connection_test.yml/badge.svg?branch=main)
 
 ## このリポジトリについて
 
-gRPCをビルドしたDockerイメージを管理しています。
+gRPCをビルドしたDockerイメージを配布しています。
 
 gRPCのPHP拡張モジュールにはビルド速度に課題があります。 (Issue. <https://github.com/grpc/grpc/issues/34278>)  
 gRPCのビルド成果物のみ取得するアプローチで、  
