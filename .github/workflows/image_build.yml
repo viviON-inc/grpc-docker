@@ -26,11 +26,15 @@ jobs:
                     - { php_ver: "8.1", os_ver: "bullseye",  glibc_ver: "2.31" }
                     - { php_ver: "8.2", os_ver: "bullseye",  glibc_ver: "2.31" }
                     - { php_ver: "8.3", os_ver: "bullseye",  glibc_ver: "2.31" }
+                    - { php_ver: "8.4", os_ver: "bullseye",  glibc_ver: "2.31" }
                     - { php_ver: "8.1", os_ver: "bookworm",  glibc_ver: "2.36" }
                     - { php_ver: "8.2", os_ver: "bookworm",  glibc_ver: "2.36" }
                     - { php_ver: "8.3", os_ver: "bookworm",  glibc_ver: "2.36" }
+                    - { php_ver: "8.4", os_ver: "bookworm",  glibc_ver: "2.36" }
                 grpc_ver:
                     # Refarence: https://pecl.php.net/package/grpc
+                    - 1.68.0
+                    - 1.67.0
                     - 1.66.0
                     - 1.65.5
                     - 1.64.1
