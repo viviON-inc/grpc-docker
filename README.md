@@ -24,7 +24,7 @@ FROM php:8.3-fpm-bookworm
 # RUN pecl install grpc
 
 ## grpc.soを取得し、PHPの拡張モジュールディレクトリに配置します。
-COPY --from=ghcr.io/vivion-inc/grpc-docker:php8.3-pecl-grpc1.66.0-bookworm /usr/local/lib/php/extensions/grpc.so /tmp/grpc.so
+COPY --from=ghcr.io/vivion-inc/grpc-docker:php8.4-pecl-grpc1.68.0-bookworm /usr/local/lib/php/extensions/grpc.so /tmp/grpc.so
 RUN mv /tmp/grpc.so $(php-config --extension-dir)/grpc.so && docker-php-ext-enable grpc
 ```
 
@@ -51,8 +51,9 @@ RUN mv /tmp/grpc.so $(php-config --extension-dir)/grpc.so && docker-php-ext-enab
     | php7.4-pecl          | grpc1.64.1           | glibc2.31                 |
     | php8.0-pecl          | grpc1.65.5           | bullseye                  |
     | php8.1-pecl          | grpc1.66.0           | glibc2.36                 |
-    | php8.2-pecl          |                      | bookworm                  |
-    | php8.3-pecl          |                      |                           |
+    | php8.2-pecl          | grpc1.67.0           | bookworm                  |
+    | php8.3-pecl          | grpc1.68.0           |                           |
+    | php8.4-pecl          |                      |                           |
 
   - Example
-    - `ghcr.io/vivion-inc/grpc-docker:php8.3-pecl-grpc1.66.0-bookworm`
+    - `ghcr.io/vivion-inc/grpc-docker:php8.4-pecl-grpc1.68.0-bookworm`
