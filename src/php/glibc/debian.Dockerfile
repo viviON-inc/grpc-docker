@@ -19,9 +19,23 @@ RUN MAKEFLAGS="-j $(nproc)" \
 RUN strip --strip-all $(php-config --extension-dir)/grpc.so && \
     mv $(php-config --extension-dir)/grpc.so ${GRPC_OUTPUT_PATH}
 
-FROM scratch
+# Refinement
+FROM php:${PHP_BASEIMAGE_TAG} as build-aux
+
+RUN apt update -y && \
+    apt install -y \
+        git \
+        build-essential
 
 ARG GRPC_OUTPUT_PATH
 COPY --from=build ${GRPC_OUTPUT_PATH} ${GRPC_OUTPUT_PATH}
+
+RUN strip --strip-all ${GRPC_OUTPUT_PATH}
+
+# Final image
+FROM scratch
+
+ARG GRPC_OUTPUT_PATH
+COPY --from=build-aux ${GRPC_OUTPUT_PATH} ${GRPC_OUTPUT_PATH}
 
 COPY ACKNOWLEDGEMENTS.txt LICENSE README.md /
