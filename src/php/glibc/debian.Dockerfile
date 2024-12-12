@@ -16,7 +16,8 @@ ARG GRPC_OUTPUT_PATH
 RUN MAKEFLAGS="-j $(nproc)" \
     pecl install grpc-${GRPC_VERSION}
 
-RUN mv $(php-config --extension-dir)/grpc.so ${GRPC_OUTPUT_PATH}
+RUN strip --strip-all $(php-config --extension-dir)/grpc.so && \
+    mv $(php-config --extension-dir)/grpc.so ${GRPC_OUTPUT_PATH}
 
 FROM scratch
 
