@@ -11,6 +11,7 @@ jobs:
             matrix:
                 base_image:
                     # https://hub.docker.com/_/php
+                    - { php_ver: "7.3", os_ver: "bullseye",  glibc_ver: "2.31" }
                     - { php_ver: "7.4", os_ver: "bullseye",  glibc_ver: "2.31" }
                     - { php_ver: "8.0", os_ver: "bullseye",  glibc_ver: "2.31" }
                     - { php_ver: "8.1", os_ver: "bullseye",  glibc_ver: "2.31" }
@@ -23,7 +24,7 @@ jobs:
                     - { php_ver: "8.4", os_ver: "bookworm",  glibc_ver: "2.36" }
                 grpc_ver:
                     # Refarence: https://pecl.php.net/package/grpc
-                    - 1.66.0
+                    - 1.70.0
 
         steps:
           - name: Checkout
