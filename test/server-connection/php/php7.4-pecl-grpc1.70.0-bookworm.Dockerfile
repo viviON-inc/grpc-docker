@@ -12,7 +12,7 @@ RUN apt update -y && \
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
 
-COPY --from=ghcr.io/vivion-inc/grpc-docker:php8.0-pecl-grpc1.66.0-bullseye /usr/local/lib/php/extensions/grpc.so /tmp/grpc.so
+COPY --from=ghcr.io/vivion-inc/grpc-docker:php7.4-pecl-grpc1.70.0-bookworm /usr/local/lib/php/extensions/grpc.so /tmp/grpc.so
 
 RUN mv /tmp/grpc.so $(php-config --extension-dir)/grpc.so && \
   ## NOTICE: peclのC実装のprotobufはPHP8.1以上が必要, そのためcomposer定義のPHP実装を利用する。
@@ -20,6 +20,6 @@ RUN mv /tmp/grpc.so $(php-config --extension-dir)/grpc.so && \
   # pecl install protobuf && \
   docker-php-ext-enable grpc
 
-RUN git clone --recurse-submodules -b v1.66.0 --depth 1 --shallow-submodules https://github.com/grpc/grpc
+RUN git clone --recurse-submodules -b v1.70.0 --depth 1 --shallow-submodules https://github.com/grpc/grpc
 RUN cd grpc/examples/php && \
   composer install
