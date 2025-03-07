@@ -18,7 +18,7 @@ gRPCのビルド成果物のみ取得するアプローチで、
 下記を参考にCOPY, RUN命令を追記するようDockerfileを編集してください。
 
 ```Dockerfile
-FROM php:8.3-fpm-bookworm
+FROM php:8.4-fpm-bookworm
 
 ## ビルド処理を代替するためコメントアウトします。
 # RUN pecl install grpc
@@ -48,12 +48,16 @@ RUN mv /tmp/grpc.so $(php-config --extension-dir)/grpc.so && docker-php-ext-enab
 
     | PHP Version Prefixes | gRPC Version Infixes | libc Environment Suffixes |
     | -------------------- | -------------------- | --------------------------|
-    | php7.4-pecl          | grpc1.64.1           | glibc2.31                 |
-    | php8.0-pecl          | grpc1.65.5           | bullseye                  |
-    | php8.1-pecl          | grpc1.66.0           | glibc2.36                 |
-    | php8.2-pecl          | grpc1.67.0           | bookworm                  |
-    | php8.3-pecl          | grpc1.68.0           |                           |
-    | php8.4-pecl          |                      |                           |
+    | php7.3-pecl          | grpc1.69.0           | glibc2.31                 |
+    | php7.4-pecl          | grpc1.70.0           | bullseye                  |
+    | php8.0-pecl          |                      |                           |
+
+    | PHP Version Prefixes | gRPC Version Infixes | libc Environment Suffixes |
+    | -------------------- | -------------------- | --------------------------|
+    | php8.1-pecl          | grpc1.69.0           | glibc2.31                 |
+    | php8.2-pecl          | grpc1.70.0           | bullseye                  |
+    | php8.3-pecl          |                      | glibc2.36                 |
+    | php8.4-pecl          |                      | bookworm                  |
 
   - Example
     - `ghcr.io/vivion-inc/grpc-docker:php8.4-pecl-grpc1.68.0-bookworm`
