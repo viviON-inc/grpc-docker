@@ -33,6 +33,8 @@ jobs:
                     - { php_ver: "8.3", os_ver: "bookworm",  glibc_ver: "2.36" }
                     - { php_ver: "8.4", os_ver: "bookworm",  glibc_ver: "2.36" }
                     - { php_ver: "8.4", os_ver: "trixie",  glibc_ver: "2.41" }
+                    - { php_ver: "8.5", os_ver: "bookworm",  glibc_ver: "2.36" }
+                    - { php_ver: "8.5", os_ver: "trixie",  glibc_ver: "2.41" }
                 grpc_ver:
                     # Refarence: https://pecl.php.net/package/grpc
                     - 1.75.0

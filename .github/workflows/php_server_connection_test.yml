@@ -1,5 +1,10 @@
 name: "PHP: Test gRPC Connection"
 
+# NOTE: このテストは grpc.so を自前でビルドせず、ghcr.io に publish 済みの
+#       イメージ (php<ver>-pecl-grpc<grpc_ver>-<os>) を COPY して検証します。
+#       そのため grpc_ver は "PHP: Docker Image Build" workflow と一致させ、
+#       先にビルドworkflowを実行してイメージを publish しておく必要があります。
+
 on:
     workflow_dispatch: {}
 
@@ -22,9 +27,10 @@ jobs:
                     - { php_ver: "8.2", os_ver: "bookworm",  glibc_ver: "2.36" }
                     - { php_ver: "8.3", os_ver: "bookworm",  glibc_ver: "2.36" }
                     - { php_ver: "8.4", os_ver: "bookworm",  glibc_ver: "2.36" }
+                    - { php_ver: "8.5", os_ver: "bookworm",  glibc_ver: "2.36" }
                 grpc_ver:
                     # Refarence: https://pecl.php.net/package/grpc
-                    - 1.70.0
+                    - 1.75.0
 
         steps:
           - name: Checkout
