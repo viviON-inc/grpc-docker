@@ -24,7 +24,7 @@ FROM php:8.4-fpm-bookworm
 # RUN pecl install grpc
 
 ## grpc.soを取得し、PHPの拡張モジュールディレクトリに配置します。
-COPY --from=ghcr.io/vivion-inc/grpc-docker:php8.4-pecl-grpc1.75.0-bookworm /usr/local/lib/php/extensions/grpc.so /tmp/grpc.so
+COPY --from=ghcr.io/vivion-inc/grpc-docker:php8.4-pecl-grpc1.78.0-bookworm /usr/local/lib/php/extensions/grpc.so /tmp/grpc.so
 RUN mv /tmp/grpc.so $(php-config --extension-dir)/grpc.so && docker-php-ext-enable grpc
 ```
 
@@ -48,13 +48,13 @@ RUN mv /tmp/grpc.so $(php-config --extension-dir)/grpc.so && docker-php-ext-enab
 
     | PHP Version Prefixes | gRPC Version Infixes | libc Environment Suffixes |
     | -------------------- | -------------------- | --------------------------|
-    | php7.3-pecl          | grpc1.75.0           | glibc2.31                 |
+    | php7.3-pecl          | grpc1.78.0           | glibc2.31                 |
     | php7.4-pecl          |                      | bullseye                  |
     | php8.0-pecl          |                      |                           |
 
     | PHP Version Prefixes | gRPC Version Infixes | libc Environment Suffixes |
     | -------------------- | -------------------- | --------------------------|
-    | php8.1-pecl          | grpc1.75.0           | glibc2.31                 |
+    | php8.1-pecl          | grpc1.78.0           | glibc2.31                 |
     | php8.2-pecl          |                      | glibc2.36                 |
     | php8.3-pecl          |                      | glibc2.41                 |
     | php8.4-pecl          |                      | bullseye                  |
@@ -62,4 +62,4 @@ RUN mv /tmp/grpc.so $(php-config --extension-dir)/grpc.so && docker-php-ext-enab
     |                      |                      | trixie                    |
 
   - Example
-    - `ghcr.io/vivion-inc/grpc-docker:php8.4-pecl-grpc1.75.0-bookworm`
+    - `ghcr.io/vivion-inc/grpc-docker:php8.4-pecl-grpc1.78.0-bookworm`

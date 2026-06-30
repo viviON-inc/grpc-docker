@@ -14,7 +14,7 @@ on:
             grpc_ver:
                 description: "ビルドする grpc バージョン (PHP 8.5 は 1.78.0 以上が必要)"
                 required: false
-                default: "1.75.0"
+                default: "1.78.0"
             platforms:
                 description: "ビルド対象アーキテクチャ (検証時は amd64 のみが高速)"
                 required: false
