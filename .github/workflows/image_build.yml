@@ -1,7 +1,24 @@
 name: "PHP: Docker Image Build"
 
 on:
-    workflow_dispatch: {}
+    workflow_dispatch:
+        inputs:
+            php_ver:
+                description: "ビルド対象のPHPバージョン (例: 8.5。空欄で全バージョン)"
+                required: false
+                default: ""
+            os_ver:
+                description: "ビルド対象のOS (例: trixie。空欄で全OS)"
+                required: false
+                default: ""
+            platforms:
+                description: "ビルド対象アーキテクチャ (検証時は amd64 のみが高速)"
+                required: false
+                type: choice
+                default: "linux/amd64,linux/arm64"
+                options:
+                    - "linux/amd64,linux/arm64"
+                    - "linux/amd64"
 
 permissions:
   contents: read
@@ -14,30 +31,56 @@ env:
   GRPC_OUTPUT_PATH: /usr/local/lib/php/extensions/grpc.so
 
 jobs:
+    # workflow_dispatch の入力 (php_ver / os_ver) でフィルタした
+    # ビルドマトリクスを動的に生成する。空欄なら全エントリを対象とする。
+    prepare:
+        runs-on: [ ubuntu-24.04 ]
+        outputs:
+            matrix: ${{ steps.set-matrix.outputs.matrix }}
+        steps:
+          - name: Set Build Matrix
+            id: set-matrix
+            shell: bash
+            env:
+              PHP_VER: ${{ inputs.php_ver }}
+              OS_VER: ${{ inputs.os_ver }}
+            run: |
+              # https://hub.docker.com/_/php
+              base='[
+                {"php_ver":"7.3","os_ver":"bullseye","glibc_ver":"2.31"},
+                {"php_ver":"7.4","os_ver":"bullseye","glibc_ver":"2.31"},
+                {"php_ver":"8.0","os_ver":"bullseye","glibc_ver":"2.31"},
+                {"php_ver":"8.1","os_ver":"bullseye","glibc_ver":"2.31"},
+                {"php_ver":"8.2","os_ver":"bullseye","glibc_ver":"2.31"},
+                {"php_ver":"8.3","os_ver":"bullseye","glibc_ver":"2.31"},
+                {"php_ver":"8.4","os_ver":"bullseye","glibc_ver":"2.31"},
+                {"php_ver":"8.1","os_ver":"bookworm","glibc_ver":"2.36"},
+                {"php_ver":"8.2","os_ver":"bookworm","glibc_ver":"2.36"},
+                {"php_ver":"8.3","os_ver":"bookworm","glibc_ver":"2.36"},
+                {"php_ver":"8.4","os_ver":"bookworm","glibc_ver":"2.36"},
+                {"php_ver":"8.4","os_ver":"trixie","glibc_ver":"2.41"},
+                {"php_ver":"8.5","os_ver":"bookworm","glibc_ver":"2.36"},
+                {"php_ver":"8.5","os_ver":"trixie","glibc_ver":"2.41"}
+              ]'
+              filtered=$(echo "$base" | jq -c \
+                --arg php "$PHP_VER" \
+                --arg os "$OS_VER" \
+                '[.[] | select(($php == "" or .php_ver == $php) and ($os == "" or .os_ver == $os))]')
+              count=$(echo "$filtered" | jq 'length')
+              echo "対象エントリ数: $count (php_ver='$PHP_VER' os_ver='$OS_VER')"
+              echo "$filtered" | jq .
+              if [ "$count" -eq 0 ]; then
+                echo "::error::指定された php_ver / os_ver に一致するビルド対象がありません"
+                exit 1
+              fi
+              echo "matrix={\"base_image\":$filtered,\"grpc_ver\":[\"1.75.0\"]}" >> "$GITHUB_OUTPUT"
+
     php-debian:
+        needs: prepare
         runs-on: [ ubuntu-24.04 ]
         strategy:
             fail-fast: false
-            matrix:
-                base_image:
-                    # https://hub.docker.com/_/php
-                    - { php_ver: "7.3", os_ver: "bullseye",  glibc_ver: "2.31" }
-                    - { php_ver: "7.4", os_ver: "bullseye",  glibc_ver: "2.31" }
-                    - { php_ver: "8.0", os_ver: "bullseye",  glibc_ver: "2.31" }
-                    - { php_ver: "8.1", os_ver: "bullseye",  glibc_ver: "2.31" }
-                    - { php_ver: "8.2", os_ver: "bullseye",  glibc_ver: "2.31" }
-                    - { php_ver: "8.3", os_ver: "bullseye",  glibc_ver: "2.31" }
-                    - { php_ver: "8.4", os_ver: "bullseye",  glibc_ver: "2.31" }
-                    - { php_ver: "8.1", os_ver: "bookworm",  glibc_ver: "2.36" }
-                    - { php_ver: "8.2", os_ver: "bookworm",  glibc_ver: "2.36" }
-                    - { php_ver: "8.3", os_ver: "bookworm",  glibc_ver: "2.36" }
-                    - { php_ver: "8.4", os_ver: "bookworm",  glibc_ver: "2.36" }
-                    - { php_ver: "8.4", os_ver: "trixie",  glibc_ver: "2.41" }
-                    - { php_ver: "8.5", os_ver: "bookworm",  glibc_ver: "2.36" }
-                    - { php_ver: "8.5", os_ver: "trixie",  glibc_ver: "2.41" }
-                grpc_ver:
-                    # Refarence: https://pecl.php.net/package/grpc
-                    - 1.75.0
+            matrix: ${{ fromJSON(needs.prepare.outputs.matrix) }}
 
         steps:
           - name: Checkout
@@ -78,9 +121,7 @@ jobs:
               tags: |
                 ${{ env.IMAGE_TAG_OSVER }}
                 ${{ env.IMAGE_TAG_LIBCVER }}
-              platforms: |
-                linux/amd64
-                linux/arm64
+              platforms: ${{ inputs.platforms }}
               labels: |
                 vivion-inc.php.version="${{ matrix.base_image.php_ver }}"
                 vivion-inc.glib.version="${{ matrix.base_image.glibc_ver }}"
