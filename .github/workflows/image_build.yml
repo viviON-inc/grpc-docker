@@ -11,6 +11,10 @@ on:
                 description: "ビルド対象のOS (例: trixie。空欄で全OS)"
                 required: false
                 default: ""
+            grpc_ver:
+                description: "ビルドする grpc バージョン (PHP 8.5 は 1.78.0 以上が必要)"
+                required: false
+                default: "1.75.0"
             platforms:
                 description: "ビルド対象アーキテクチャ (検証時は amd64 のみが高速)"
                 required: false
@@ -44,6 +48,7 @@ jobs:
             env:
               PHP_VER: ${{ inputs.php_ver }}
               OS_VER: ${{ inputs.os_ver }}
+              GRPC_VER: ${{ inputs.grpc_ver }}
             run: |
               # https://hub.docker.com/_/php
               base='[
@@ -67,13 +72,14 @@ jobs:
                 --arg os "$OS_VER" \
                 '[.[] | select(($php == "" or .php_ver == $php) and ($os == "" or .os_ver == $os))]')
               count=$(echo "$filtered" | jq 'length')
-              echo "対象エントリ数: $count (php_ver='$PHP_VER' os_ver='$OS_VER')"
+              echo "対象エントリ数: $count (php_ver='$PHP_VER' os_ver='$OS_VER' grpc_ver='$GRPC_VER')"
               echo "$filtered" | jq .
               if [ "$count" -eq 0 ]; then
                 echo "::error::指定された php_ver / os_ver に一致するビルド対象がありません"
                 exit 1
               fi
-              echo "matrix={\"base_image\":$filtered,\"grpc_ver\":[\"1.75.0\"]}" >> "$GITHUB_OUTPUT"
+              grpc_json=$(jq -cn --arg v "$GRPC_VER" '[$v]')
+              echo "matrix={\"base_image\":$filtered,\"grpc_ver\":$grpc_json}" >> "$GITHUB_OUTPUT"
 
     php-debian:
         needs: prepare
