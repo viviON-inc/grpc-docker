@@ -22,4 +22,5 @@ RUN mv /tmp/grpc.so $(php-config --extension-dir)/grpc.so && \
 
 RUN git clone --recurse-submodules -b v1.78.0 --depth 1 --shallow-submodules https://github.com/grpc/grpc
 RUN cd grpc/examples/php && \
+  composer config policy.advisories.block false && \
   composer install
