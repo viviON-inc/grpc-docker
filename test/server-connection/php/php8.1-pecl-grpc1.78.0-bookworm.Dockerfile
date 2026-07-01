@@ -16,8 +16,10 @@ COPY --from=composer /usr/bin/composer /usr/bin/composer
 COPY --from=ghcr.io/vivion-inc/grpc-docker:php8.1-pecl-grpc1.78.0-bookworm /usr/local/lib/php/extensions/grpc.so /tmp/grpc.so
 
 RUN mv /tmp/grpc.so $(php-config --extension-dir)/grpc.so && \
-  pecl install protobuf && \
-  docker-php-ext-enable grpc protobuf
+  ## NOTICE: peclのC実装のprotobufはPHP8.2以上が必要, そのためcomposer定義のPHP実装を利用する。
+  ## pecl error message: pecl/protobuf requires PHP (version >= 8.2.0), installed version is 8.1.33
+  # pecl install protobuf && \
+  docker-php-ext-enable grpc
 
 RUN git clone --recurse-submodules -b v1.78.0 --depth 1 --shallow-submodules https://github.com/grpc/grpc
 RUN cd grpc/examples/php && \
