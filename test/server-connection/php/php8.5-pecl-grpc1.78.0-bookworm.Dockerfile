@@ -8,6 +8,7 @@ RUN apt update -y && \
   git \
   build-essential \
   autoconf \
+  unzip \
   zlib1g-dev
 
 COPY --from=composer /usr/bin/composer /usr/bin/composer
